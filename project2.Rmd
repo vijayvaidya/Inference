@@ -1,0 +1,109 @@
+---
+title: "Statistical Inference Course - ToothGrowth Data Analysis"
+author: "Vijay Vaidya"
+date: "Thursday, July 23, 2015"
+output: pdf_document
+---
+##Overview
+We will analyze the "ToothGrowth" data from R package and compare the impact of the toothgrowh with the supplement and dose of supplement
+
+##Exploratory data analysis
+We will load "ToothGrowth" data and do some basic analysis
+```{r load, echo=TRUE}
+rm(list = ls()) # clear the environment
+data(ToothGrowth) # load the data
+class(ToothGrowth) # check the class/data type
+```
+
+Now that we know that we have frame, we can do basic analysis
+```{r, echo=TRUE}
+#Total no.of rows
+nrow(ToothGrowth)
+
+#Column names
+colnames(ToothGrowth)
+
+#Supplement types
+levels(ToothGrowth$supp)
+
+#How many unique doses
+unique(ToothGrowth$dose)
+
+#Max length
+ToothGrowth[ which.max(ToothGrowth$len), ]
+
+#Min Length
+ToothGrowth[ which.min(ToothGrowth$len), ]
+
+#Avg Length
+mean(ToothGrowth$len)
+
+#Avg Length of tooth from the group taking OJ
+mean(ToothGrowth[ ToothGrowth$supp == "OJ", ]$len)
+
+#Avg Length of tooth from the group taking VC
+mean(ToothGrowth[ ToothGrowth$supp == "VC", ]$len)
+
+#Any NA values?
+which(is.na(ToothGrowth$len))
+
+```
+we can now chart a graph to show consumption of orange juice or vitamin C and the doses impacts teeth growth:
+```{r, echo=TRUE}
+library(ggplot2)
+require(graphics)
+coplot(len ~ dose | supp, data = ToothGrowth, panel = panel.smooth,xlab = "ToothGrowth data: length vs dose, given type of supplement")
+```
+
+##Comparison of tooth growth by supp and dose
+So we want to compare whether length of the tooth dependins upon the dose of OJ or VC.  So we split *ToothGrowth* by doses and calculate the respective confidence intervals:  
+```{r, echo=TRUE}
+doses <- unique(ToothGrowth$dose)
+```
+
+** Dose `r doses[ 1 ]` mg**
+
+Avg tooth length with OJ - `r mean(ToothGrowth[ (ToothGrowth$dose == doses[ 1 ] & ToothGrowth$supp == "OJ") , ]$len)` 
+Std deviation `r sd(ToothGrowth[ (ToothGrowth$dose == doses[ 1 ] & ToothGrowth$supp == "OJ") , ]$len)`
+
+
+Avg tooth length with VC - `r mean(ToothGrowth[ (ToothGrowth$dose == doses[ 1 ] & ToothGrowth$supp == "VC") , ]$len)`
+Std deviation `r sd(ToothGrowth[ (ToothGrowth$dose == doses[ 1 ] & ToothGrowth$supp == "VC") , ]$len)`
+
+```{r, echo=TRUE}
+d <- ToothGrowth[ ToothGrowth$dose == doses[ 1 ], ]
+t.test(len ~ supp, data = d, paired = FALSE, var.equal = TRUE)
+```
+
+** Dose `r doses[ 2 ]`mg**
+
+Avg tooth length with OJ - `r mean(ToothGrowth[ (ToothGrowth$dose == doses[ 2 ] & ToothGrowth$supp == "OJ") , ]$len)` 
+Std deviation `r sd(ToothGrowth[ (ToothGrowth$dose == doses[ 2 ] & ToothGrowth$supp == "OJ") , ]$len)`
+
+
+Avg tooth length with VC - `r mean(ToothGrowth[ (ToothGrowth$dose == doses[ 2 ] & ToothGrowth$supp == "VC") , ]$len)`
+Std deviation `r sd(ToothGrowth[ (ToothGrowth$dose == doses[ 2 ] & ToothGrowth$supp == "VC") , ]$len)`
+
+```{r, echo=TRUE}
+d <- ToothGrowth[ ToothGrowth$dose == doses[ 2 ], ]
+t.test(len ~ supp, data = d, paired = FALSE, var.equal = TRUE)
+```
+
+** Dose `r doses[ 3 ]`mg**
+
+Avg tooth length with OJ - `r mean(ToothGrowth[ (ToothGrowth$dose == doses[ 3 ] & ToothGrowth$supp == "OJ") , ]$len)` 
+Std deviation `r sd(ToothGrowth[ (ToothGrowth$dose == doses[ 3 ] & ToothGrowth$supp == "OJ") , ]$len)`
+
+
+Avg tooth length with VC - `r mean(ToothGrowth[ (ToothGrowth$dose == doses[ 3 ] & ToothGrowth$supp == "VC") , ]$len)`
+Std deviation `r sd(ToothGrowth[ (ToothGrowth$dose == doses[ 3 ] & ToothGrowth$supp == "VC") , ]$len)`
+
+```{r, echo=TRUE}
+d <- ToothGrowth[ ToothGrowth$dose == doses[ 3 ], ]
+t.test(len ~ supp, data = d, paired = FALSE, var.equal = TRUE)
+```
+
+##Conclusion
+1. From the results we can conclude that when dose size s of 0.5mg, average tooth growth is higher when suppeent of OJ is provied than the supplement of VC. We can say that with 95% confidence because p-value (0.005304) is < 0.01. 
+2. Same thing (as described above) is true for the dose size of 1mg. We have the strong evidence for thes dose size of 1mg because p-value (0.0007807) is too small.
+3. However we can't cconclude the same for the dose of 2mg because p-value (0.9637) is way higher that 0.01
